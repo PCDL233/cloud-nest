@@ -80,13 +80,13 @@ const doMenuClick = ({ key }: { key: string }) => {
   })
 }
 
-//国际化
-const emit = defineEmits(['update:locale'])
-const locale = ref('en')
-
+//国际化自定义事件(子传父)
+const emit = defineEmits(['update-locale'])
+const locale = ref('zh')
 const handleLocaleChange = (e: Event) => {
-  const target = e.target as HTMLInputElement
-  emit('update:locale', target.value)
+  const newLocale = (e.target as HTMLInputElement).value
+  locale.value = newLocale
+  emit('update-locale', newLocale)
 }
 </script>
 

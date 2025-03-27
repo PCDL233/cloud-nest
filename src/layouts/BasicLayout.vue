@@ -3,7 +3,7 @@
     <a-config-provider :locale="locale === 'en' ? enUS : zhCN">
       <a-layout style="min-height: 100vh">
         <a-layout-header class="header">
-          <GlobalHeader :local="locale" @update:locale="updateLocale" />
+          <GlobalHeader @update-locale="updateLocale" />
         </a-layout-header>
         <a-layout-content class="content">
           <a-space wrap>
@@ -36,8 +36,8 @@ import { ref } from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 
-dayjs.locale('en')
-const locale = ref('en')
+dayjs.locale('zh')
+const locale = ref('zh')
 
 //国际化
 const updateLocale = (newLocale: string) => {
