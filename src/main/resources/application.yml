@@ -1,0 +1,38 @@
+server:
+  port: 8000
+  servlet:
+    context-path: /api
+spring:
+  application:
+    name: cloud-nest-backend
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/cloud_nest?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: 123456
+# MyBatis 配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+    # 日志配置
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  # 全局配置
+  global-config:
+    db-config:
+      # 逻辑删除配置
+      logic-delete-field: isDelete
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+# 接口文档配置
+knife4j:
+  enable: true
+  openapi:
+    title: 接口文档
+    description: 智绘云巢接口文档
+    version: v1.0
+    group:
+      default:
+        api-rule: package
+        api-rule-resources:
+          - com.cmq.cloudnestbackend.controller
