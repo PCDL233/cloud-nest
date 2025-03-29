@@ -22,7 +22,7 @@
     >
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'userAvatar'">
-          <a-image :src="record.userAvatar" :width="120" style="border-radius: 50%" />
+          <a-image :src="record.userAvatar" :width="80" :height="80" style="border-radius: 50%" />
         </template>
         <template v-else-if="column.dataIndex === 'userRole'">
           <div v-if="record.userRole === 'admin'">
@@ -39,24 +39,63 @@
           {{ dayjs(record.updateTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
         <template v-else-if="column.key === 'action'">
-          <a-button danger @click="doDelete(record.id)"> 删除</a-button>
-          <!--          todo:编辑用户信息功能-->
-          <a-button type="primary" style="margin-left: 10px">编辑</a-button>
+          <a-popconfirm
+            title="确定删除吗？"
+            ok-text="确定"
+            cancel-text="取消"
+            @confirm="() => doDelete(record.id)"
+          >
+            <a-button danger> 删除</a-button>
+          </a-popconfirm>
+          <a-button style="margin-left: 10px" @click="showEditModal(record)">编辑</a-button>
         </template>
       </template>
     </a-table>
+
+    <!-- 编辑用户信息的模态框 -->
+    <a-modal
+      v-model:open="editModalOpen"
+      title="编辑用户信息"
+      centered
+      :confirm-loading="confirmLoading"
+      @ok="handleEditOk"
+    >
+      <a-form :model="editForm" layout="vertical">
+        <a-form-item label="用户名">
+          <a-input v-model:value="editForm.userName" />
+        </a-form-item>
+        <a-form-item label="简介">
+          <a-input v-model:value="editForm.userProfile" />
+        </a-form-item>
+        <a-form-item label="头像">
+          <a-input v-model:value="editForm.userAvatar" />
+        </a-form-item>
+        <a-form-item label="用户角色">
+          <a-select v-model:value="editForm.userRole">
+            <a-select-option value="admin">管理员</a-select-option>
+            <a-select-option value="user">普通用户</a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { deleteUserUsingPost, listUserVoByPageUsingPost } from '@/api/userController.ts'
+import {
+  deleteUserUsingPost,
+  listUserVoByPageUsingPost,
+  updateUserUsingPost,
+} from '@/api/userController.ts'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
+import { isEqual, cloneDeep } from 'lodash-es'
 
 const columns = [
   {
     title: 'id',
     dataIndex: 'id',
+    sorter: true,
   },
   {
     title: '账号',
@@ -77,14 +116,17 @@ const columns = [
   {
     title: '用户角色',
     dataIndex: 'userRole',
+    sorter: true,
   },
   {
     title: '创建时间',
     dataIndex: 'createTime',
+    sorter: true,
   },
   {
     title: '更新时间',
     dataIndex: 'updateTime',
+    sorter: true,
   },
   {
     title: '操作',
@@ -131,13 +173,14 @@ const pagination = computed(() => {
   }
 })
 //表格变化事件
-const doTableChange = (page: any) => {
-  searchParams.current = page.current
-  searchParams.pageSize = page.pageSize
+const doTableChange = (pagination: any, filters: any, sorter: any) => {
+  searchParams.current = pagination.current
+  searchParams.pageSize = pagination.pageSize
+  searchParams.sortField = sorter.field
+  searchParams.sortOrder = sorter.order === 'ascend' ? 'ascend' : 'descend'
   //重新获取数据
   fetchData()
 }
-
 //搜索事件
 const doSearch = () => {
   //重置页码
@@ -160,5 +203,35 @@ const doDelete = async (id: number) => {
   } else {
     message.error('删除失败')
   }
+}
+
+// 编辑用户信息
+const editModalOpen = ref(false)
+const confirmLoading = ref(false)
+// 编辑表单
+const editForm = reactive<API.UserUpdateRequest>({})
+const originalForm = reactive<API.UserVO>({})
+const showEditModal = (record: API.UserUpdateRequest) => {
+  Object.assign(editForm, record)
+  Object.assign(originalForm, cloneDeep(record))
+  editModalOpen.value = true
+}
+
+const handleEditOk = async () => {
+  if (isEqual(editForm, originalForm)) {
+    message.info('没有任何改动')
+    editModalOpen.value = false
+    return
+  }
+  confirmLoading.value = true
+  const res = await updateUserUsingPost(editForm)
+  if (res.data.code === 0) {
+    message.success('更新成功')
+    await fetchData()
+    editModalOpen.value = false
+  } else {
+    message.error('更新失败' + res.data.message)
+  }
+  confirmLoading.value = false
 }
 </script>
