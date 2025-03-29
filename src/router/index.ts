@@ -1,4 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import HomePage from '@/pages/HomePage.vue'
+import UserLoginPage from '@/pages/user/UserLoginPage.vue'
+import UserRegisterPage from '@/pages/user/UserRegisterPage.vue'
+import UserManagePage from '@/pages/admin/UserManagePage.vue'
+import UserInfoPage from '@/pages/user/UserInfoPage.vue'
+import AboutView from '@/views/AboutView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -6,27 +12,31 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../pages/HomePage.vue'),
+      component: HomePage,
     },
     {
       path: '/user/login',
       name: '用户登录',
-      component: () => import('../pages/user/UserLoginPage.vue'),
+      component: UserLoginPage,
     },
     {
       path: '/user/register',
       name: '用户注册',
-      component: () => import('../pages/user/UserRegisterPage.vue'),
+      component: UserRegisterPage,
     },
     {
       path: '/admin/userManage',
       name: '用户管理',
-      component: () => import('../pages/admin/UserManagePage.vue'),
+      component: UserManagePage,
+    },
+    {
+      path: '/user/info',
+      component: UserInfoPage,
     },
     {
       path: '/about',
       name: 'about',
-      component: () => import('../views/AboutView.vue'),
+      component: AboutView,
     },
   ],
 })

@@ -60,14 +60,20 @@
       :confirm-loading="confirmLoading"
       @ok="handleEditOk"
     >
-      <a-form :model="editForm" layout="vertical">
+      <a-form
+        :model="editForm"
+        layout="horizontal"
+        :label-col="{ span: 4 }"
+        :wrapper-col="{ span: 18 }"
+        style="margin-top: 40px"
+      >
         <a-form-item label="用户名">
           <a-input v-model:value="editForm.userName" />
         </a-form-item>
         <a-form-item label="简介">
-          <a-input v-model:value="editForm.userProfile" />
+          <a-textarea v-model:value="editForm.userProfile" />
         </a-form-item>
-        <a-form-item label="头像">
+        <a-form-item label="头像链接">
           <a-input v-model:value="editForm.userAvatar" />
         </a-form-item>
         <a-form-item label="用户角色">

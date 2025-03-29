@@ -36,8 +36,7 @@
               </a-space>
               <template #overlay>
                 <a-menu>
-                  <!-- todo:修改登录用户信息（弹窗）功能-->
-                  <a-menu-item @click="doEditUserInfo">
+                  <a-menu-item @click="router.push('/user/info')">
                     <UserOutlined />
                     个人信息
                   </a-menu-item>
