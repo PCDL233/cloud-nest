@@ -19,7 +19,7 @@ const router = createRouter({
       component: () => import('../pages/user/UserRegisterPage.vue'),
     },
     {
-      path: '/admin/UserManage',
+      path: '/admin/userManage',
       name: '用户管理',
       component: () => import('../pages/admin/UserManagePage.vue'),
     },
