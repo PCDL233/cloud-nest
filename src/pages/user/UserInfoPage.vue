@@ -123,13 +123,4 @@ const cancelEdit = () => {
 .ant-form-item-label > label {
   color: #1890ff;
 }
-
-.action-buttons .ant-btn {
-  transition: all 0.3s;
-}
-
-.action-buttons .ant-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
 </style>
