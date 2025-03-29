@@ -17,16 +17,32 @@
           @click="doMenuClick"
         />
       </a-col>
+      <!-- 国际化 -->
       <a-col flex="200px">
-        <a-radio-group v-model:value="locale" @change="handleLocaleChange">
+        <a-radio-group v-model:value="locale" @change="localeChangeFunc(locale)">
           <a-radio-button key="en" :value="'en'">English</a-radio-button>
           <a-radio-button key="cn" :value="'zh'">中文</a-radio-button>
         </a-radio-group>
       </a-col>
+
+      <!--      用户信息展示-->
       <a-col flex="120px">
         <div class="user-login-status">
           <div v-if="loginUserStore.loginUser.id">
-            {{ loginUserStore.loginUser.username ?? 'null' }}
+            <a-dropdown>
+              <a-space>
+                <a-avatar :src="loginUserStore.loginUser.userAvatar" size="large"></a-avatar>
+                {{ loginUserStore.loginUser.userName ?? 'null' }}
+              </a-space>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item @click="doLogout">
+                    <LogoutOutlined />
+                    退出登录
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
           </div>
           <div v-else>
             <a-button type="primary" href="/user/login">登录</a-button>
@@ -38,10 +54,11 @@
 </template>
 <script lang="ts" setup>
 import { h, ref } from 'vue'
-import { HomeOutlined } from '@ant-design/icons-vue'
-import type { MenuProps } from 'ant-design-vue'
+import { HomeOutlined, LogoutOutlined } from '@ant-design/icons-vue'
+import { type MenuProps, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
+import { userLogoutUsingPost } from '@/api/userController.ts'
 
 //登录用户信息
 const loginUserStore = useLoginUserStore()
@@ -80,14 +97,22 @@ const doMenuClick = ({ key }: { key: string }) => {
   })
 }
 
-//国际化自定义事件(子传父)
-const emit = defineEmits(['update-locale'])
-const locale = ref('zh')
-const handleLocaleChange = (e: Event) => {
-  const newLocale = (e.target as HTMLInputElement).value
-  locale.value = newLocale
-  emit('update-locale', newLocale)
+//退出登录
+const doLogout = async () => {
+  const res = await userLogoutUsingPost()
+  if (res.data.code === 0) {
+    loginUserStore.setLoginUser({
+      userName: '未登录',
+    })
+    message.success('退出登录成功')
+    router.push('/user/login')
+  } else {
+    message.success('退出登录失败' + res.data.message)
+  }
 }
+//国际化
+const { localeChangeFunc, localeFather } = defineProps(['localeChangeFunc', 'localeFather'])
+const locale = ref(localeFather)
 </script>
 
 <style scoped>

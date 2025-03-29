@@ -2,22 +2,15 @@
   <div id="basicLayout">
     <a-config-provider :locale="locale === 'en' ? enUS : zhCN">
       <a-layout style="min-height: 100vh">
+        <!--顶部-->
         <a-layout-header class="header">
-          <GlobalHeader @update-locale="updateLocale" />
+          <GlobalHeader :localeFather="locale" :localeChangeFunc="updateLocale" />
         </a-layout-header>
+        <!--主体内容-->
         <a-layout-content class="content">
-          <a-space wrap>
-            <a-select show-search style="width: 200px">
-              <a-select-option value="jack">jack</a-select-option>
-              <a-select-option value="lucy">lucy</a-select-option>
-            </a-select>
-            <a-date-picker />
-            <a-time-picker />
-            <a-range-picker style="width: 200px" />
-          </a-space>
-          <!--主体内容-->
           <router-view />
         </a-layout-content>
+        <!--底部-->
         <a-layout-footer class="footer">
           <a href="https://gitee.com/pcdl233" target="_blank" rel="noopener noreferrer">
             by PCDL233
@@ -36,13 +29,15 @@ import { ref } from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 
-dayjs.locale('zh')
-const locale = ref('zh')
+const savedLocale = localStorage.getItem('locale') || 'zh'
+dayjs.locale(savedLocale)
+const locale = ref(savedLocale)
 
 //国际化
 const updateLocale = (newLocale: string) => {
   locale.value = newLocale
   dayjs.locale(newLocale)
+  localStorage.setItem('locale', newLocale)
 }
 </script>
 

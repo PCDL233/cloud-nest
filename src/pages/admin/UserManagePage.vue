@@ -1,14 +1,14 @@
 <template>
-  <div id="homePage">
+  <div id="userManagePage">
     <h1>{{ msg }}</h1>
   </div>
 </template>
 
 <script setup lang="ts">
-const msg = '欢迎来到智绘云巢！！！'
+const msg = 'userManagePage！！！'
 </script>
 
 <style scoped>
-#homePage {
+#userManagePage {
 }
 </style>
