@@ -1,4 +1,4 @@
-package com.cmq.cloudnestbackend.model.dto;
+package com.cmq.cloudnestbackend.model.dto.user;
 
 import lombok.Data;
 

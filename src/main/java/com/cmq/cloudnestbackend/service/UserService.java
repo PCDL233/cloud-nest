@@ -1,11 +1,15 @@
 package com.cmq.cloudnestbackend.service;
 
-import com.cmq.cloudnestbackend.model.dto.UserRegisterRequest;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.cmq.cloudnestbackend.model.dto.user.UserQueryRequest;
+import com.cmq.cloudnestbackend.model.dto.user.UserRegisterRequest;
 import com.cmq.cloudnestbackend.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cmq.cloudnestbackend.model.vo.LoginUserVO;
+import com.cmq.cloudnestbackend.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author CMQ233
@@ -56,10 +60,34 @@ public interface UserService extends IService<User> {
     LoginUserVO getLoginUserVO(User user);
 
     /**
+     * 获取脱敏后用户信息
+     *
+     * @param user 用户
+     * @return 用户信息(脱敏)
+     */
+    UserVO getUserVO(User user);
+
+    /**
+     * 获取脱敏后用户信息列表
+     *
+     * @param userList 用户列表
+     * @return 用户信息列表(脱敏)
+     */
+    List<UserVO> getUserVOList(List<User> userList);
+
+    /**
      * 用户注销
      *
      * @param request HttpServletRequest
      * @return 是否注销成功
      */
     Boolean userLogout(HttpServletRequest request);
+
+    /**
+     * 获取查询条件
+     *
+     * @param userQueryRequest 用户查询请求体
+     * @return 查询条件
+     */
+    QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 }
