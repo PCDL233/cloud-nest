@@ -35,8 +35,13 @@
         <template v-if="column.dataIndex === 'createTime'">
           {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
+        <template v-if="column.dataIndex === 'updateTime'">
+          {{ dayjs(record.updateTime).format('YYYY-MM-DD HH:mm:ss') }}
+        </template>
         <template v-else-if="column.key === 'action'">
           <a-button danger @click="doDelete(record.id)"> 删除</a-button>
+          <!--          todo:编辑用户信息功能-->
+          <a-button type="primary" style="margin-left: 10px">编辑</a-button>
         </template>
       </template>
     </a-table>
@@ -76,6 +81,10 @@ const columns = [
   {
     title: '创建时间',
     dataIndex: 'createTime',
+  },
+  {
+    title: '更新时间',
+    dataIndex: 'updateTime',
   },
   {
     title: '操作',

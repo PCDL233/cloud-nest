@@ -36,13 +36,18 @@
               </a-space>
               <template #overlay>
                 <a-menu>
-                  <a-menu-item @click="doLogout">
-                    <LogoutOutlined />
-                    退出登录
+                  <!-- todo:修改登录用户信息（弹窗）功能-->
+                  <a-menu-item @click="doEditUserInfo">
+                    <UserOutlined />
+                    个人信息
                   </a-menu-item>
                   <a-menu-item @click="doAbout">
                     <InfoCircleOutlined />
-                    关于
+                    关于作者
+                  </a-menu-item>
+                  <a-menu-item @click="doLogout">
+                    <LogoutOutlined />
+                    退出登录
                   </a-menu-item>
                 </a-menu>
               </template>
@@ -58,7 +63,12 @@
 </template>
 <script lang="ts" setup>
 import { computed, h, ref } from 'vue'
-import { HomeOutlined, LogoutOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
+import {
+  HomeOutlined,
+  LogoutOutlined,
+  InfoCircleOutlined,
+  UserOutlined,
+} from '@ant-design/icons-vue'
 import { type MenuProps, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
@@ -80,10 +90,15 @@ const originItems = [
     label: '用户管理',
     title: '用户管理',
   },
+  /*  {
+      key: 'others',
+      label: h('a', { href: 'https://gitee.com/PCDL233', target: '_blank' }, '关于作者'),
+      title: '关于作者',
+    },*/
   {
-    key: 'others',
-    label: h('a', { href: 'https://gitee.com/PCDL233', target: '_blank' }, '关于作者'),
-    title: '编程导航',
+    key: '/about',
+    label: '关于',
+    title: '关于',
   },
 ]
 
@@ -132,7 +147,7 @@ const doLogout = async () => {
 }
 //关于
 const doAbout = () => {
-  router.push('/about')
+  window.open('https://gitee.com/PCDL233', '_blank')
 }
 //国际化
 const { localeChangeFunc, localeFather } = defineProps(['localeChangeFunc', 'localeFather'])

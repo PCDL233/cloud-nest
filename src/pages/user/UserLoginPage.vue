@@ -72,6 +72,10 @@ const handleSubmit = async (values: API.UserLoginRequest) => {
 #UserLoginPage {
   max-width: 360px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 60vh;
 }
 
 .title {
