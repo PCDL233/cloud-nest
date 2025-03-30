@@ -1,13 +1,25 @@
 package com.cmq.cloudnestbackend.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.cmq.cloudnestbackend.model.dto.picture.PictureQueryRequest;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureUploadRequest;
 import com.cmq.cloudnestbackend.model.entity.Picture;
 import com.cmq.cloudnestbackend.model.entity.User;
 import com.cmq.cloudnestbackend.model.vo.PictureVO;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+
 public interface PictureService extends IService<Picture> {
+
+    /**
+     * 校验图片参数
+     *
+     * @param picture 图片对象
+     */
+    void validPicture(Picture picture);
 
     /**
      * 上传图片
@@ -18,4 +30,31 @@ public interface PictureService extends IService<Picture> {
      * @return 上传结果
      */
     PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, User loginUser);
+
+    /**
+     * 获取查询条件
+     *
+     * @param pictureQueryRequest 图片查询请求
+     * @return 图片查询条件
+     */
+    QueryWrapper<Picture> getQueryWrapper(PictureQueryRequest pictureQueryRequest);
+
+
+    /**
+     * 获取图片信息包装类(单个)
+     *
+     * @param picture 图片对象
+     * @param request HttpServletRequest
+     * @return 图片信息包装类
+     */
+    PictureVO getPictureVO(Picture picture, HttpServletRequest request);
+
+    /**
+     * 获取图片信息包装类(分页)
+     *
+     * @param picturePage 图片分页对象
+     * @param request     HttpServletRequest
+     * @return 图片信息包装类分页对象
+     */
+    Page<PictureVO> getPictureVOPage(Page<Picture> picturePage, HttpServletRequest request);
 }
