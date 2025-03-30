@@ -5,7 +5,7 @@ import ACCESS_ENUM from '@/access/accessEnum.ts'
 
 export const useLoginUserStore = defineStore('loginUser', () => {
   const loginUser = ref<API.LoginUserVO>({
-    userName: ACCESS_ENUM.NOT_LOGIN,
+    userRole: ACCESS_ENUM.NOT_LOGIN,
   })
 
   /**

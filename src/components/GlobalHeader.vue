@@ -107,7 +107,7 @@ const filterMenus = (menus = [] as MenuProps['items']) => {
   return menus?.filter((menu) => {
     if (menu.key.startsWith('/admin')) {
       const loginUser = loginUserStore.loginUser
-      if (!loginUser || loginUser.userRole !== 'admin') {
+      if (!loginUser || loginUser.userRole !== ACCESS_ENUM.ADMIN) {
         return false
       }
     }
@@ -137,7 +137,7 @@ const doLogout = async () => {
   const res = await userLogoutUsingPost()
   if (res.data.code === 0) {
     loginUserStore.setLoginUser({
-      userName: ACCESS_ENUM.NOT_LOGIN,
+      userRole: ACCESS_ENUM.NOT_LOGIN,
     })
     message.success('退出登录成功')
     router.push('/user/login')

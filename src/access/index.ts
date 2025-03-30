@@ -11,8 +11,8 @@ import checkAccess from './checkAccess'
  */
 router.beforeEach(async (to, _from, next) => {
   const loginUserStore = useLoginUserStore()
+  await loginUserStore.fetchLoginUser()
   let loginUser = loginUserStore.loginUser
-  console.log('登陆用户信息', loginUser)
   const needAccess = (to.meta?.access as string) ?? ACCESS_ENUM.NOT_LOGIN
   // 要跳转的页面必须要登陆
   if (needAccess !== ACCESS_ENUM.NOT_LOGIN) {
