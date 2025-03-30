@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getLoginUserUsingGet } from '@/api/userController.ts'
+import ACCESS_ENUM from '@/access/accessEnum.ts'
 
 export const useLoginUserStore = defineStore('loginUser', () => {
   const loginUser = ref<API.LoginUserVO>({
-    userName: '未登录',
+    userName: ACCESS_ENUM.NOT_LOGIN,
   })
 
   /**

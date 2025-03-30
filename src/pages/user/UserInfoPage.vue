@@ -1,6 +1,6 @@
 <template>
   <div id="UserInfoCard">
-    <a-card class="custom-card" :title="editMode ? '编辑个人信息' : '个人信息'" :bordered="false">
+    <a-card class="custom-card" :title="editMode ? '编辑信息' : '个人信息'" :bordered="false">
       <template #extra>
         <a-button class="edit-btn" type="link" @click="editMode = !editMode">
           {{ editMode ? '取消' : '编辑' }}
@@ -22,7 +22,7 @@
         </a-form-item>
         <a-form-item label="头像">
           <div class="avatar-container">
-            <a-image :src="userInfo.userAvatar" width="70px" style="border-radius: 50%" />
+            <a-avatar :src="userInfo.userAvatar" size="large"/>
             <a-input v-model:value="userInfo.userAvatar" class="avatar-input" />
           </div>
         </a-form-item>

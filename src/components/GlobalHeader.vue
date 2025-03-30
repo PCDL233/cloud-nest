@@ -72,6 +72,7 @@ import { type MenuProps, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import { userLogoutUsingPost } from '@/api/userController.ts'
+import ACCESS_ENUM from '@/access/accessEnum.ts'
 
 //获取登录用户信息
 const loginUserStore = useLoginUserStore()
@@ -136,7 +137,7 @@ const doLogout = async () => {
   const res = await userLogoutUsingPost()
   if (res.data.code === 0) {
     loginUserStore.setLoginUser({
-      userName: '未登录',
+      userName: ACCESS_ENUM.NOT_LOGIN,
     })
     message.success('退出登录成功')
     router.push('/user/login')
