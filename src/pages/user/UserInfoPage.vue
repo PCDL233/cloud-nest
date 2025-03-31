@@ -22,12 +22,16 @@
         </a-form-item>
         <a-form-item label="头像">
           <div class="avatar-container">
-            <a-avatar :src="userInfo.userAvatar" size="large"/>
+            <a-avatar :src="userInfo.userAvatar" size="large" />
             <a-input v-model:value="userInfo.userAvatar" class="avatar-input" />
           </div>
         </a-form-item>
         <a-form-item label="简介">
-          <a-textarea v-model:value="userInfo.userProfile" :rows="3" placeholder="请输入简介" />
+          <a-textarea
+            v-model:value="userInfo.userProfile"
+            :auto-size="{ minRows: 2, maxRows: 4 }"
+            placeholder="请输入简介"
+          />
         </a-form-item>
         <a-form-item label="用户角色">
           <a-select v-model:value="userInfo.userRole">

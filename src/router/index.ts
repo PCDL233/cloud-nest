@@ -7,6 +7,9 @@ import UserInfoPage from '@/pages/user/UserInfoPage.vue'
 import AboutView from '@/views/AboutView.vue'
 import NoAuthPage from '@/pages/user/NoAuthPage.vue'
 import ACCESS_ENUM from '@/access/accessEnum.ts'
+import AddPicturePage from '@/pages/picture/AddPicturePage.vue'
+import PictureManagePage from '@/pages/picture/PictureManagePage.vue'
+import PictureDetailPage from '@/pages/picture/PictureDetailPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,6 +38,20 @@ const router = createRouter({
       },
     },
     {
+      path: '/admin/pictureManage',
+      name: '图片管理',
+      component: PictureManagePage,
+      meta: {
+        access: ACCESS_ENUM.ADMIN,
+      },
+    },
+    {
+      path: '/picture/:id',
+      name: '图片详情',
+      component: PictureDetailPage,
+      props: true,
+    },
+    {
       path: '/user/info',
       component: UserInfoPage,
     },
@@ -47,6 +64,11 @@ const router = createRouter({
       path: '/noAuth',
       name: 'noAuth',
       component: NoAuthPage,
+    },
+    {
+      path: '/add_picture',
+      name: '创建图片',
+      component: AddPicturePage,
     },
   ],
 })

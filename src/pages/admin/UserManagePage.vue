@@ -39,15 +39,17 @@
           {{ dayjs(record.updateTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
         <template v-else-if="column.key === 'action'">
-          <a-popconfirm
-            title="确定删除吗？"
-            ok-text="确定"
-            cancel-text="取消"
-            @confirm="() => doDelete(record.id)"
-          >
-            <a-button danger> 删除</a-button>
-          </a-popconfirm>
-          <a-button style="margin-left: 10px" @click="showEditModal(record)">编辑</a-button>
+          <a-space>
+            <a-button type="link" @click="showEditModal(record)">编辑</a-button>
+            <a-popconfirm
+              title="确定删除吗？"
+              ok-text="确定"
+              cancel-text="取消"
+              @confirm="() => doDelete(record.id)"
+            >
+              <a-button type="link" danger> 删除</a-button>
+            </a-popconfirm>
+          </a-space>
         </template>
       </template>
     </a-table>
@@ -71,7 +73,10 @@
           <a-input v-model:value="editForm.userName" />
         </a-form-item>
         <a-form-item label="简介">
-          <a-textarea v-model:value="editForm.userProfile" />
+          <a-textarea
+            :auto-size="{ minRows: 2, maxRows: 4 }"
+            v-model:value="editForm.userProfile"
+          />
         </a-form-item>
         <a-form-item label="头像链接">
           <a-input v-model:value="editForm.userAvatar" />
