@@ -1,20 +1,24 @@
 package com.cmq.cloudnestbackend.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.cmq.cloudnestbackend.exception.BusinessException;
 import com.cmq.cloudnestbackend.exception.ErrorCode;
 import com.cmq.cloudnestbackend.exception.ThrowUtils;
 import com.cmq.cloudnestbackend.manager.FileManager;
 import com.cmq.cloudnestbackend.mapper.PictureMapper;
 import com.cmq.cloudnestbackend.model.dto.file.UploadPictureResult;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureQueryRequest;
+import com.cmq.cloudnestbackend.model.dto.picture.PictureReviewRequest;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureUploadRequest;
 import com.cmq.cloudnestbackend.model.entity.Picture;
 import com.cmq.cloudnestbackend.model.entity.User;
+import com.cmq.cloudnestbackend.model.enums.PictureReviewStatusEnum;
 import com.cmq.cloudnestbackend.model.vo.PictureVO;
 import com.cmq.cloudnestbackend.model.vo.UserVO;
 import com.cmq.cloudnestbackend.service.PictureService;
@@ -61,6 +65,14 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         }
     }
 
+    /**
+     * 上传图片
+     *
+     * @param multipartFile        图片文件
+     * @param pictureUploadRequest 图片上传请求
+     * @param loginUser            登录用户
+     * @return 上传结果
+     */
     @Override
     public PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, User loginUser) {
         //1.校验参数
@@ -72,10 +84,12 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         }
         //更新操作，判断图片是否存在
         if (pictureId != null) {
-            boolean exists = this.lambdaQuery()
-                    .eq(Picture::getId, pictureId)
-                    .exists();
-            ThrowUtils.throwIf(!exists, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
+            Picture oldPicture = this.getById(pictureId);
+            ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
+            //仅本人或管理员可修改
+            if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+            }
         }
         //3.上传图片
         //按照用户ID分文件夹
@@ -91,6 +105,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         picture.setPicScale(uploadPictureResult.getPicScale());
         picture.setPicFormat(uploadPictureResult.getPicFormat());
         picture.setUserId(loginUser.getId());
+        //新增：补充审核参数
+        this.fillReviewParams(picture, loginUser);
         //保存图片信息到数据库
         if (pictureId != null) {
             //新增操作:补充图片id和修改时间
@@ -128,6 +144,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         String picFormat = pictureQueryRequest.getPicFormat();
         String searchText = pictureQueryRequest.getSearchText();
         Long userId = pictureQueryRequest.getUserId();
+        Integer reviewStatus = pictureQueryRequest.getReviewStatus();
+        String reviewMessage = pictureQueryRequest.getReviewMessage();
+        Long reviewerId = pictureQueryRequest.getReviewerId();
         String sortField = pictureQueryRequest.getSortField();
         String sortOrder = pictureQueryRequest.getSortOrder();
         // 从多字段中搜索
@@ -148,6 +167,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         queryWrapper.eq(ObjUtil.isNotEmpty(picHeight), "picHeight", picHeight);
         queryWrapper.eq(ObjUtil.isNotEmpty(picSize), "picSize", picSize);
         queryWrapper.eq(ObjUtil.isNotEmpty(picScale), "picScale", picScale);
+        queryWrapper.eq(ObjUtil.isNotEmpty(reviewStatus), "reviewStatus", reviewStatus);
+        queryWrapper.eq(ObjUtil.isNotEmpty(reviewerId), "reviewerId", reviewerId);
+        queryWrapper.like(StrUtil.isNotBlank(reviewMessage), "reviewMessage", reviewMessage);
         // JSON 数组查询
         if (CollUtil.isNotEmpty(tags)) {
             for (String tag : tags) {
@@ -211,6 +233,59 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         });
         pictureVOPage.setRecords(pictureVOList);
         return pictureVOPage;
+    }
+
+
+    /**
+     * 图片审核(仅管理员)
+     *
+     * @param pictureReviewRequest 图片审核请求
+     * @param loginUser            登录用户
+     */
+    @Override
+    public void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser) {
+        //1.校验参数
+        ThrowUtils.throwIf(pictureReviewRequest == null, ErrorCode.PARAMS_ERROR);
+        Long id = pictureReviewRequest.getId();
+        Integer reviewStatus = pictureReviewRequest.getReviewStatus();
+        PictureReviewStatusEnum reviewStatusEnum = PictureReviewStatusEnum.getEnumByValue(reviewStatus);
+        if (id == null || reviewStatusEnum == null || PictureReviewStatusEnum.REVIEWING.equals(reviewStatusEnum)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //2.判断是否存在
+        Picture oldPicture = this.getById(id);
+        ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
+        //3.数据审核状态是否重复
+        if (oldPicture.getReviewStatus().equals(reviewStatus)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请勿重复审核");
+        }
+        //4.操作数据库
+        Picture updatePicture = new Picture();
+        BeanUtil.copyProperties(pictureReviewRequest, updatePicture);
+        updatePicture.setReviewerId(loginUser.getId());
+        updatePicture.setReviewTime(new Date());
+        boolean result = this.updateById(updatePicture);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+    }
+
+    /**
+     * 填充审核参数
+     *
+     * @param picture   图片对象
+     * @param loginUser 登录用户
+     */
+    @Override
+    public void fillReviewParams(Picture picture, User loginUser) {
+        if (userService.isAdmin(loginUser)) {
+            //管理员自动过审
+            picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+            picture.setReviewerId(loginUser.getId());
+            picture.setReviewTime(new Date());
+            picture.setReviewMessage("管理员自动审核通过");
+        } else {
+            //普通用户默认待审核
+            picture.setReviewStatus(PictureReviewStatusEnum.REVIEWING.getValue());
+        }
     }
 }
 

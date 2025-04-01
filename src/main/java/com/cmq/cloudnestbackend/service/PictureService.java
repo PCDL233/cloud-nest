@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureQueryRequest;
+import com.cmq.cloudnestbackend.model.dto.picture.PictureReviewRequest;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureUploadRequest;
 import com.cmq.cloudnestbackend.model.entity.Picture;
 import com.cmq.cloudnestbackend.model.entity.User;
@@ -57,4 +58,20 @@ public interface PictureService extends IService<Picture> {
      * @return 图片信息包装类分页对象
      */
     Page<PictureVO> getPictureVOPage(Page<Picture> picturePage, HttpServletRequest request);
+
+    /**
+     * 图片审核(仅管理员)
+     *
+     * @param pictureReviewRequest 图片审核请求
+     * @param loginUser            登录用户
+     */
+    void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
+
+    /**
+     * 填充审核参数
+     *
+     * @param picture   图片对象
+     * @param loginUser 登录用户
+     */
+    void fillReviewParams(Picture picture, User loginUser);
 }
