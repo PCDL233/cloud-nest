@@ -19,6 +19,7 @@
       :data-source="dataList"
       :pagination="pagination"
       @change="doTableChange"
+      :scroll="{ x: 'max-content' }"
     >
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'userAvatar'">
