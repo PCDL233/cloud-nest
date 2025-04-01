@@ -59,6 +59,23 @@ public class PictureController {
     }
 
     /**
+     * 通过url上传图片(可重复上传)
+     *
+     * @param pictureUploadRequest 图片上传请求（图片id）
+     * @param request              HttpServletRequest
+     * @return 上传结果
+     */
+    @PostMapping("/upload/url")
+    public BaseResponse<PictureVO> uploadPictureByUrl(@RequestBody PictureUploadRequest pictureUploadRequest,
+                                                      HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        //获取图片url
+        String fileUrl = pictureUploadRequest.getFileUrl();
+        PictureVO pictureVO = pictureService.uploadPicture(fileUrl, pictureUploadRequest, loginUser);
+        return ResultUtils.success(pictureVO);
+    }
+
+    /**
      * 删除图片
      *
      * @param deleteRequest 删除请求（图片id）

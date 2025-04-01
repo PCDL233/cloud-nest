@@ -10,7 +10,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cmq.cloudnestbackend.exception.BusinessException;
 import com.cmq.cloudnestbackend.exception.ErrorCode;
 import com.cmq.cloudnestbackend.exception.ThrowUtils;
-import com.cmq.cloudnestbackend.manager.FileManager;
+import com.cmq.cloudnestbackend.manager.upload.FilePictureUpload;
+import com.cmq.cloudnestbackend.manager.upload.PictureUploadTemplate;
+import com.cmq.cloudnestbackend.manager.upload.UrlPictureUpload;
 import com.cmq.cloudnestbackend.mapper.PictureMapper;
 import com.cmq.cloudnestbackend.model.dto.file.UploadPictureResult;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureQueryRequest;
@@ -24,7 +26,6 @@ import com.cmq.cloudnestbackend.model.vo.UserVO;
 import com.cmq.cloudnestbackend.service.PictureService;
 import com.cmq.cloudnestbackend.service.UserService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -39,9 +40,13 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         implements PictureService {
 
     @Resource
-    private FileManager fileManager;
-    @Resource
     private UserService userService;
+
+    @Resource
+    private FilePictureUpload filePictureUpload;
+
+    @Resource
+    private UrlPictureUpload urlPictureUpload;
 
     /**
      * 校验图片参数
@@ -68,13 +73,13 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     /**
      * 上传图片
      *
-     * @param multipartFile        图片文件
+     * @param inputSource          文件输入源
      * @param pictureUploadRequest 图片上传请求
      * @param loginUser            登录用户
      * @return 上传结果
      */
     @Override
-    public PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, User loginUser) {
+    public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
         //1.校验参数
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         //2.判断操作是新增还是更新
@@ -94,7 +99,12 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         //3.上传图片
         //按照用户ID分文件夹
         String uploadPathPrefix = String.format("public/%s", loginUser.getId());
-        UploadPictureResult uploadPictureResult = fileManager.uploadPicture(multipartFile, uploadPathPrefix);
+        //根据inputSource判断上传方式(文件上传还是URL)
+        PictureUploadTemplate pictureUploadTemplate = filePictureUpload;
+        if (inputSource instanceof String) {
+            pictureUploadTemplate = urlPictureUpload;
+        }
+        UploadPictureResult uploadPictureResult = pictureUploadTemplate.uploadPicture(inputSource, uploadPathPrefix);
         //构造图片对象
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());
