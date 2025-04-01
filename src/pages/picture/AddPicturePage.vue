@@ -3,8 +3,17 @@
     <h2 style="margin-bottom: 16px">
       {{ route.query.id ? '修改图片' : '创建图片' }}
     </h2>
-    <!--    图片上传组件-->
-    <PictureUpload :picture="picture" :on-success="onSuccess" />
+    <!--    选择上传方式-->
+    <a-tabs v-model:activeKey="uploadType">
+      <a-tab-pane key="file" tab="文件上传">
+        <!--    图片文件上传组件-->
+        <PictureUpload :picture="picture" :on-success="onSuccess" class="tab-content" />
+      </a-tab-pane>
+      <a-tab-pane key="url" tab="URL上传" force-render>
+        <!--    URL图片上传组件-->
+        <UrlPictureUpload :picture="picture" :on-success="onSuccess" class="tab-content" />
+      </a-tab-pane>
+    </a-tabs>
     <!--    图片信息表单-->
     <a-form v-if="picture" layout="vertical" :model="pictureForm" @finish="handleSubmit">
       <a-form-item label="名称" name="name">
@@ -52,7 +61,9 @@ import {
   listPictureTagCategoryUsingGet,
 } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
+import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
 
+const uploadType = ref<'file' | 'url'>('file')
 const picture = ref<API.PictureVO>()
 
 /**
@@ -146,5 +157,9 @@ onMounted(() => {
 #addPicture {
   max-width: 720px;
   margin: 0 auto;
+}
+
+.tab-content {
+  margin-top: 20px;
 }
 </style>
