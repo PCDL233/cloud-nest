@@ -3,7 +3,10 @@ package com.cmq.cloudnestbackend.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -17,6 +20,7 @@ import com.cmq.cloudnestbackend.mapper.PictureMapper;
 import com.cmq.cloudnestbackend.model.dto.file.UploadPictureResult;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureQueryRequest;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureReviewRequest;
+import com.cmq.cloudnestbackend.model.dto.picture.PictureUploadByBatchRequest;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureUploadRequest;
 import com.cmq.cloudnestbackend.model.entity.Picture;
 import com.cmq.cloudnestbackend.model.entity.User;
@@ -25,16 +29,23 @@ import com.cmq.cloudnestbackend.model.vo.PictureVO;
 import com.cmq.cloudnestbackend.model.vo.UserVO;
 import com.cmq.cloudnestbackend.service.PictureService;
 import com.cmq.cloudnestbackend.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         implements PictureService {
@@ -108,7 +119,12 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         //构造图片对象
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());
-        picture.setName(uploadPictureResult.getPicName());
+        //新增：支持自定义图片名称
+        String picName = uploadPictureResult.getPicName();
+        if (pictureUploadRequest != null && StrUtil.isNotBlank(pictureUploadRequest.getPicName())) {
+            picName = pictureUploadRequest.getPicName();
+        }
+        picture.setName(picName);
         picture.setPicSize(uploadPictureResult.getPicSize());
         picture.setPicWidth(uploadPictureResult.getPicWidth());
         picture.setPicHeight(uploadPictureResult.getPicHeight());
@@ -296,6 +312,74 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             //普通用户默认待审核
             picture.setReviewStatus(PictureReviewStatusEnum.REVIEWING.getValue());
         }
+    }
+
+    @Override
+    public Integer uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser) {
+        //1.校验参数
+        String searchText = pictureUploadByBatchRequest.getSearchText();
+        Integer count = pictureUploadByBatchRequest.getCount();
+        String namePrefix = pictureUploadByBatchRequest.getNamePrefix();
+        // 新增：设置名称前缀默认值
+        if (StrUtil.isBlank(namePrefix)) {
+            namePrefix = searchText;
+        }
+        ThrowUtils.throwIf(count > 20, ErrorCode.PARAMS_ERROR, "最多 20 条");
+        // 2.抓取的地址
+        String fetchUrl = String.format("https://cn.bing.com/images/async?q=%s&mmasync=1", searchText);
+        Document document;
+        try {
+            document = Jsoup.connect(fetchUrl).get();
+        } catch (IOException e) {
+            log.error("获取页面失败", e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "获取页面失败");
+        }
+        //3.解析图片地址
+        Element div = document.getElementsByClass("dgControl").first();
+        if (ObjUtil.isNull(div)) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "获取元素失败");
+        }
+        Elements imgElementList = div.select(".iusc");
+        //4.遍历元素,依次上传图片
+        int uploadCount = 0;
+        for (Element imgElement : imgElementList) {
+            //获取图片地址(图片详情地址)
+            String dataM = imgElement.attr("m");
+            String fileUrl;
+            try {
+                JSONObject jsonObject = JSONUtil.parseObj(dataM);
+                fileUrl = jsonObject.getStr("murl");
+            } catch (Exception e) {
+                log.error("解析图片地址失败", e);
+                continue;
+            }
+            if (StrUtil.isBlank(fileUrl)) {
+                log.info("当前链接为空，已跳过: {}", fileUrl);
+                continue;
+            }
+            // 5.处理图片上传地址，防止出现转义问题
+            int questionMarkIndex = fileUrl.indexOf("?");
+            if (questionMarkIndex > -1) {
+                fileUrl = fileUrl.substring(0, questionMarkIndex);
+            }
+            // 6.上传图片
+            PictureUploadRequest pictureUploadRequest = new PictureUploadRequest();
+            pictureUploadRequest.setFileUrl(fileUrl);
+            pictureUploadRequest.setPicName(namePrefix + (uploadCount + 1));
+            try {
+                PictureVO pictureVO = this.uploadPicture(fileUrl, pictureUploadRequest, loginUser);
+                log.info("图片上传成功, id = {}", pictureVO.getId());
+                uploadCount++;
+            } catch (Exception e) {
+                log.error("图片上传失败", e);
+                continue;
+            }
+            //7.判断是否达到上传数量
+            if (uploadCount >= count) {
+                break;
+            }
+        }
+        return uploadCount;
     }
 }
 

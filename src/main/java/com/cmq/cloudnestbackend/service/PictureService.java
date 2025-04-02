@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureQueryRequest;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureReviewRequest;
+import com.cmq.cloudnestbackend.model.dto.picture.PictureUploadByBatchRequest;
 import com.cmq.cloudnestbackend.model.dto.picture.PictureUploadRequest;
 import com.cmq.cloudnestbackend.model.entity.Picture;
 import com.cmq.cloudnestbackend.model.entity.User;
 import com.cmq.cloudnestbackend.model.vo.PictureVO;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -74,4 +74,14 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser 登录用户
      */
     void fillReviewParams(Picture picture, User loginUser);
+
+
+    /**
+     * 批量抓取和创建图片
+     *
+     * @param pictureUploadByBatchRequest 图片批量抓取图片请求
+     * @param loginUser                   登录用户
+     * @return 抓取的数量
+     */
+    Integer uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser);
 }
