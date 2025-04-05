@@ -1,6 +1,7 @@
 package com.cmq.cloudnestbackend.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cmq.cloudnestbackend.annotation.AuthCheck;
@@ -21,6 +22,9 @@ import com.cmq.cloudnestbackend.service.PictureService;
 import com.cmq.cloudnestbackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
@@ -39,6 +44,8 @@ public class PictureController {
 
     @Resource
     private PictureService pictureService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 上传图片(可重复上传)
@@ -199,6 +206,47 @@ public class PictureController {
                 pictureService.getQueryWrapper(pictureQueryRequest));
         // 获取封装类
         return ResultUtils.success(pictureService.getPictureVOPage(picturePage, request));
+    }
+
+    /**
+     * 分页获取图片列表（封装类-用户-有缓存）
+     *
+     * @param pictureQueryRequest 图片查询请求
+     * @return 图片列表(脱敏)
+     */
+    @PostMapping("/list/page/vo/cache")
+    public BaseResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryRequest pictureQueryRequest,
+                                                                      HttpServletRequest request) {
+        long current = pictureQueryRequest.getCurrent();
+        long size = pictureQueryRequest.getPageSize();
+        // 限制爬虫(一次只能展示20条数据)
+        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        //新增：普通用户只能查看审核通过的图片
+        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+        //新增：查询缓存，缓存不存在则查询数据库
+        //构建缓存key
+        String queryCondition = JSONUtil.toJsonStr(pictureQueryRequest);
+        String hashKey = DigestUtils.md5DigestAsHex(queryCondition.getBytes());
+        String redisKey = String.format("picture:listPictureVOByPage:%s", hashKey);
+        //查询缓存
+        ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
+        String cachedValue = opsForValue.get(redisKey);
+        if (cachedValue != null) {
+            //缓存存在，直接返回
+            Page<PictureVO> cachePicture = JSONUtil.toBean(cachedValue, Page.class);
+            return ResultUtils.success(cachePicture);
+        }
+        // 查询数据库
+        Page<Picture> picturePage = pictureService.page(new Page<>(current, size),
+                pictureService.getQueryWrapper(pictureQueryRequest));
+        Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage, request);
+        //写入缓存
+        String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
+        //设置随机缓存过期时间（5~10分钟）,防止缓存雪崩
+        long randomExpireTime = 300 + RandomUtil.randomInt(0, 300);
+        opsForValue.set(redisKey, cacheValue, randomExpireTime, TimeUnit.SECONDS);
+        // 获取封装类
+        return ResultUtils.success(pictureVOPage);
     }
 
     /**

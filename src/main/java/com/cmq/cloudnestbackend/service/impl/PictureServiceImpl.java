@@ -324,7 +324,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         if (StrUtil.isBlank(namePrefix)) {
             namePrefix = searchText;
         }
-        ThrowUtils.throwIf(count > 20, ErrorCode.PARAMS_ERROR, "最多 20 条");
+        ThrowUtils.throwIf(count > 20, ErrorCode.PARAMS_ERROR, "最多抓取 20 条");
         // 2.抓取的地址
         String fetchUrl = String.format("https://cn.bing.com/images/async?q=%s&mmasync=1", searchText);
         Document document;
