@@ -1,5 +1,6 @@
 package com.cmq.cloudnestbackend.manager;
 
+import cn.hutool.core.io.FileUtil;
 import com.cmq.cloudnestbackend.config.CosClientConfig;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.COSObject;
@@ -7,10 +8,13 @@ import com.qcloud.cos.model.GetObjectRequest;
 import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
+import com.qcloud.cos.model.ciModel.persistence.Rule;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class CosManager {
@@ -56,7 +60,28 @@ public class CosManager {
         PicOperations picOperations = new PicOperations();
         //1表示返回原图信息
         picOperations.setIsPicInfo(1);
+        //图片处理规则列表
+        List<PicOperations.Rule> rules = new ArrayList<>();
+        //图片压缩（格式转换成webp）
+        String webpKey = FileUtil.mainName(key) + ".webp";
+        PicOperations.Rule compressRule = new PicOperations.Rule();
+        compressRule.setFileId(webpKey);
+        compressRule.setBucket(cosClientConfig.getBucket());
+        compressRule.setRule("imageMogr2/format/webp");
+        rules.add(compressRule);
+        //构造图片处理规则
+        picOperations.setRules(rules);
         putObjectRequest.setPicOperations(picOperations);
         return cosClient.putObject(putObjectRequest);
+    }
+
+    /**
+     * 删除对象
+     *
+     * @param bucket 存储桶
+     * @param key    唯一键（文件存储地址）
+     */
+    public void deleteObject(String bucket, String key) {
+        cosClient.deleteObject(bucket, key);
     }
 }
