@@ -131,7 +131,7 @@ const getTagCategoryOptions = async () => {
 const route = useRoute()
 //获取旧数据
 const getOldPicture = async () => {
-  const id = Number(route.query.id)
+  const id = route.query.id
   if (id) {
     const res = await getPictureVoByIdUsingGet({
       id,
