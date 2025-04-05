@@ -8,7 +8,6 @@ import com.qcloud.cos.model.GetObjectRequest;
 import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
-import com.qcloud.cos.model.ciModel.persistence.Rule;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;

@@ -10,7 +10,6 @@ import com.cmq.cloudnestbackend.exception.BusinessException;
 import com.cmq.cloudnestbackend.exception.ErrorCode;
 import com.cmq.cloudnestbackend.manager.CosManager;
 import com.cmq.cloudnestbackend.model.dto.file.UploadPictureResult;
-import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.CIObject;
 import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
