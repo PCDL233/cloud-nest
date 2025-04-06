@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cmq.cloudnestbackend.exception.BusinessException;
 import com.cmq.cloudnestbackend.exception.ErrorCode;
 import com.cmq.cloudnestbackend.exception.ThrowUtils;
+import com.cmq.cloudnestbackend.manager.CosManager;
 import com.cmq.cloudnestbackend.manager.upload.FilePictureUpload;
 import com.cmq.cloudnestbackend.manager.upload.PictureUploadTemplate;
 import com.cmq.cloudnestbackend.manager.upload.UrlPictureUpload;
@@ -33,11 +34,14 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +61,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
     @Resource
     private UrlPictureUpload urlPictureUpload;
+    @Resource
+    private CosManager cosManager;
 
     /**
      * 校验图片参数
@@ -141,6 +147,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             picture.setUpdateTime(new Date());
         }
         boolean result = this.saveOrUpdate(picture);
+        //如果是更新操作，删除旧图片（删除对象存储中的图片）
+        if (pictureId != null) {
+            //异步删除旧图片
+            this.clearPictureFile(this.getById(pictureId));
+        }
         ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR, "图片上传失败");
         //4.返回结果
         return PictureVO.objToVo(picture);
@@ -381,6 +392,35 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             }
         }
         return uploadCount;
+    }
+
+    @Async
+    @Override
+    public void clearPictureFile(Picture oldPicture) {
+        //判断图片是否被多条记录引用
+        String pictureUrl = oldPicture.getUrl();
+        long count = this.lambdaQuery()
+                .eq(Picture::getId, pictureUrl)
+                .count();
+        //如果引用数量大于1，则不删除
+        if (count > 1) {
+            return;
+        }
+        try {
+            // 提取路径部分
+            String picturePath = new URL(pictureUrl).getPath();
+            cosManager.deleteObject(picturePath);
+
+            // 清理缩略图
+            String thumbnailUrl = oldPicture.getThumbnailUrl();
+            if (StrUtil.isNotBlank(thumbnailUrl)) {
+                String thumbnailPath = new URL(thumbnailUrl).getPath();
+                cosManager.deleteObject(thumbnailPath);
+            }
+        } catch (MalformedURLException e) {
+            log.error("处理图片删除时遇到格式错误的 URL。图片 URL: {}", pictureUrl, e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "格式错误的 URL");
+        }
     }
 }
 

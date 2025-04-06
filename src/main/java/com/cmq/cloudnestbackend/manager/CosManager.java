@@ -87,10 +87,9 @@ public class CosManager {
     /**
      * 删除对象
      *
-     * @param bucket 存储桶
-     * @param key    唯一键（文件存储地址）
+     * @param key 唯一键（文件存储地址）
      */
-    public void deleteObject(String bucket, String key) {
-        cosClient.deleteObject(bucket, key);
+    public void deleteObject(String key) {
+        cosClient.deleteObject(cosClientConfig.getBucket(), key);
     }
 }

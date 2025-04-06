@@ -71,7 +71,7 @@ public abstract class PictureUploadTemplate {
                     thumbnailCiObject = objectList.get(1);
                 }
                 //删除原图
-                cosManager.deleteObject(cosClientConfig.getBucket(), uploadPath);
+                cosManager.deleteObject(uploadPath);
                 //封装压缩图的返回结果
                 return buildResult(originFilename, compressedCiObject, thumbnailCiObject);
             }
