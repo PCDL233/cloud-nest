@@ -2,6 +2,10 @@ server:
   port: 8000
   servlet:
     context-path: /api
+    # cookie过期时间 1天
+    session:
+      cookie:
+        max-age: 86400
 spring:
   application:
     name: cloud-nest-backend
@@ -15,6 +19,11 @@ spring:
   servlet:
     multipart:
       max-file-size: 5MB
+  # session配置
+  session:
+    store-type: redis
+    # session过期时间 1天
+    timeout: 86400
 # MyBatis 配置
 mybatis-plus:
   configuration:
