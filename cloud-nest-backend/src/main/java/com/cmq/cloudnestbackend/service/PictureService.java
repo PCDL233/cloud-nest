@@ -3,10 +3,7 @@ package com.cmq.cloudnestbackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.cmq.cloudnestbackend.model.dto.picture.PictureQueryRequest;
-import com.cmq.cloudnestbackend.model.dto.picture.PictureReviewRequest;
-import com.cmq.cloudnestbackend.model.dto.picture.PictureUploadByBatchRequest;
-import com.cmq.cloudnestbackend.model.dto.picture.PictureUploadRequest;
+import com.cmq.cloudnestbackend.model.dto.picture.*;
 import com.cmq.cloudnestbackend.model.entity.Picture;
 import com.cmq.cloudnestbackend.model.entity.User;
 import com.cmq.cloudnestbackend.model.vo.PictureVO;
@@ -91,4 +88,28 @@ public interface PictureService extends IService<Picture> {
      * @param oldPicture 旧图片对象
      */
     void clearPictureFile(Picture oldPicture);
+
+    /**
+     * 删除图片文件
+     *
+     * @param pictureId 图片ID
+     * @param loginUser 登录用户
+     */
+    void deletePicture(long pictureId, User loginUser);
+
+    /**
+     * 编辑图片信息
+     *
+     * @param pictureEditRequest 图片编辑请求
+     * @param loginUser          登录用户
+     */
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+
+    /**
+     * 检查空间的图片权限
+     *
+     * @param picture   图片对象
+     * @param loginUser 登录用户
+     */
+    void checkPictureAuth(Picture picture, User loginUser);
 }
