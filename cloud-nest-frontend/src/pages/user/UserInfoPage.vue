@@ -34,7 +34,10 @@
           />
         </a-form-item>
         <a-form-item label="用户角色">
-          <a-select v-model:value="userInfo.userRole">
+          <a-select
+            v-model:value="userInfo.userRole"
+            :disabled="!editMode || userInfo.userRole !== ACCESS_ENUM.ADMIN"
+          >
             <a-select-option value="admin">管理员</a-select-option>
             <a-select-option value="user">普通用户</a-select-option>
           </a-select>
@@ -62,6 +65,8 @@ import { message } from 'ant-design-vue'
 import { updateUserUsingPost } from '@/api/userController.ts'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import dayjs from 'dayjs'
+import ACCESS_ENUM from '@/access/accessEnum.ts'
+import { isEqual } from 'lodash-es'
 
 const editMode = ref(false)
 //获取登录用户信息
@@ -70,6 +75,11 @@ const userInfo = loginUserStore.loginUser
 
 const originalUserInfo = reactive<API.LoginUserVO>({ ...userInfo })
 const handleSubmit = async () => {
+  if (isEqual(userInfo, originalUserInfo)) {
+    message.info('没有修改任何信息')
+    editMode.value = false
+    return
+  }
   try {
     const res = await updateUserUsingPost(userInfo)
     if (res.data.code === 0) {
