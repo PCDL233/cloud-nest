@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * 文件图片上传
  */
+@Deprecated
 @Service
 public class FilePictureUpload extends PictureUploadTemplate {
     @Override

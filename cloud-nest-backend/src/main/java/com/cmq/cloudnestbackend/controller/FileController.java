@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 
+@Deprecated
 @Slf4j
 @RestController
 @RequestMapping("/file")
