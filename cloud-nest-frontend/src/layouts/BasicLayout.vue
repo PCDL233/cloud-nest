@@ -66,17 +66,18 @@ const updateLocale = (newLocale: string) => {
 
 #basicLayout .content {
   padding: 28px;
-  background: linear-gradient(to right, #efefef, #fff);
+  background: #ffffff;
   margin-bottom: 30px;
 }
 
 #basicLayout .footer {
-  background: #efefef;
+  background: #ffffff;
   padding: 16px;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   text-align: center;
+  border-top: 0.5px solid #eee;
 }
 </style>

@@ -14,7 +14,7 @@
         <!--    图片文件上传组件-->
         <PictureUpload
           :picture="picture"
-          :spaceId:="spaceId"
+          :spaceId="spaceId"
           :on-success="onSuccess"
           class="tab-content"
         />
@@ -23,7 +23,7 @@
         <!--    URL图片上传组件-->
         <UrlPictureUpload
           :picture="picture"
-          :spaceId:="spaceId"
+          :spaceId="spaceId"
           :on-success="onSuccess"
           class="tab-content"
         />
