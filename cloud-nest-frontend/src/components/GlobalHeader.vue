@@ -4,7 +4,7 @@
       <a-col flex="200px">
         <router-link to="/">
           <div class="title-bar">
-            <img class="logo" src="../assets/logo.svg" alt="logo" />
+            <img class="logo" src="../assets/cloud-nest-logo.png" alt="logo" />
             <div class="title">智绘云巢</div>
           </div>
         </router-link>
@@ -179,7 +179,7 @@ const locale = ref(localeFather)
 }
 
 .logo {
-  height: 30px;
+  height: 63px;
 }
 
 .user-login-status {
