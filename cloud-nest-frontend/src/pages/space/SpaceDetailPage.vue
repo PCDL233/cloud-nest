@@ -1,7 +1,7 @@
 <template>
   <div id="spaceDetailPage">
     <!--    空间信息-->
-    <a-flex justify="space-between" style="padding-right: 50px">
+    <a-flex justify="space-between" style="padding-right: 100px">
       <h2>{{ space.spaceName }}（私有空间）</h2>
       <a-space size="middle">
         <a-button type="primary" :href="`/add_picture?spaceId=${id}`"> + 创建图片</a-button>
