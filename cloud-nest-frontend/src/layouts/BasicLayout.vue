@@ -6,10 +6,13 @@
         <a-layout-header class="header">
           <GlobalHeader :localeFather="locale" :localeChangeFunc="updateLocale" />
         </a-layout-header>
-        <!--主体内容-->
-        <a-layout-content class="content">
-          <router-view />
-        </a-layout-content>
+        <a-layout>
+          <GlobalSider class="sider" />
+          <!--主体内容-->
+          <a-layout-content class="content">
+            <router-view />
+          </a-layout-content>
+        </a-layout>
         <!--底部-->
         <a-layout-footer class="footer">
           <a href="https://gitee.com/pcdl233" target="_blank" rel="noopener noreferrer">
@@ -28,6 +31,7 @@ import zhCN from 'ant-design-vue/es/locale/zh_CN'
 import { ref } from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
+import GlobalSider from '@/components/GlobalSider.vue'
 
 const savedLocale = localStorage.getItem('locale') || 'zh'
 dayjs.locale(savedLocale)
@@ -45,12 +49,23 @@ const updateLocale = (newLocale: string) => {
 #basicLayout .header {
   background: white;
   color: unset;
-  margin-bottom: 15px;
+  margin-bottom: 2px;
   padding-inline: 20px;
 }
 
+#basicLayout .sider {
+  background: #ffffff;
+  border-right: 0.5px solid #eee;
+  padding-top: 20px;
+}
+
+#basicLayout :deep(.ant-menu-root) {
+  border-bottom: none !important;
+  border-inline-end: none !important;
+}
+
 #basicLayout .content {
-  padding: 20px;
+  padding: 28px;
   background: linear-gradient(to right, #efefef, #fff);
   margin-bottom: 30px;
 }

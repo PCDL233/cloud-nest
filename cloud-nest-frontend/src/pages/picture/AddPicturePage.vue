@@ -3,15 +3,30 @@
     <h2 style="margin-bottom: 16px">
       {{ route.query.id ? '修改图片' : '创建图片' }}
     </h2>
+    <a-typography-paragraph v-if="spaceId">
+      <a-tag color="blue" style="margin-right: 8px">
+        <a :href="`/space/${spaceId}`"> 空间ID：{{ spaceId }} </a>
+      </a-tag>
+    </a-typography-paragraph>
     <!--    选择上传方式-->
     <a-tabs v-model:activeKey="uploadType">
       <a-tab-pane key="file" tab="文件上传">
         <!--    图片文件上传组件-->
-        <PictureUpload :picture="picture" :on-success="onSuccess" class="tab-content" />
+        <PictureUpload
+          :picture="picture"
+          :spaceId:="spaceId"
+          :on-success="onSuccess"
+          class="tab-content"
+        />
       </a-tab-pane>
       <a-tab-pane key="url" tab="URL上传" force-render>
         <!--    URL图片上传组件-->
-        <UrlPictureUpload :picture="picture" :on-success="onSuccess" class="tab-content" />
+        <UrlPictureUpload
+          :picture="picture"
+          :spaceId:="spaceId"
+          :on-success="onSuccess"
+          class="tab-content"
+        />
       </a-tab-pane>
     </a-tabs>
     <!--    图片信息表单-->
@@ -53,7 +68,7 @@
 
 <script setup lang="ts">
 import PictureUpload from '@/components/PictureUpload.vue'
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   editPictureUsingPost,
@@ -63,8 +78,14 @@ import {
 import { message } from 'ant-design-vue'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
 
+const router = useRouter()
+const route = useRoute()
 const uploadType = ref<'file' | 'url'>('file')
 const picture = ref<API.PictureVO>()
+//空间id
+const spaceId = computed(() => {
+  return route.query?.spaceId
+})
 
 /**
  * @description: 图片上传成功回调
@@ -76,7 +97,6 @@ const onSuccess = (newPicture: API.PictureVO) => {
 }
 
 // 图片信息表单
-const router = useRouter()
 const pictureForm = reactive<API.PictureEditRequest>({})
 
 /**
@@ -84,12 +104,13 @@ const pictureForm = reactive<API.PictureEditRequest>({})
  * @param values
  */
 const handleSubmit = async (values: any) => {
-  const pictureId = picture.value.id
+  const pictureId = picture.value?.id
   if (!pictureId) {
     return
   }
   const res = await editPictureUsingPost({
     id: pictureId,
+    spaceId: spaceId.value,
     ...values,
   })
   if (res.data.code === 0 && res.data.data) {
@@ -128,7 +149,6 @@ const getTagCategoryOptions = async () => {
   }
 }
 
-const route = useRoute()
 //获取旧数据
 const getOldPicture = async () => {
   const id = route.query.id

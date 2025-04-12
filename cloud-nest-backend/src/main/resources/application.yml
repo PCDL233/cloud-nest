@@ -24,6 +24,8 @@ spring:
     store-type: redis
     # session过期时间 1天
     timeout: 86400
+  profiles:
+    active: local
 # MyBatis 配置
 mybatis-plus:
   configuration:

@@ -10,7 +10,7 @@
           <a-image
             :src="picture.url"
             :alt="picture.name"
-            style="max-height: 435px; object-fit: contain"
+            style="max-height: 435px; min-height: 435px; object-fit: contain"
           />
         </a-card>
       </a-col>
