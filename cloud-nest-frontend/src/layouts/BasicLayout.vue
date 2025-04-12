@@ -15,7 +15,7 @@
         </a-layout>
         <!--底部-->
         <a-layout-footer class="footer">
-          <a href="https://gitee.com/pcdl233" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/pcdl233" target="_blank" rel="noopener noreferrer">
             by PCDL233
           </a>
         </a-layout-footer>

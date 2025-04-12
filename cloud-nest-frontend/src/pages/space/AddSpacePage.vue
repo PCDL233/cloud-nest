@@ -26,10 +26,10 @@
     <!--    空间级别介绍-->
     <a-card title="空间级别介绍">
       <a-typography-paragraph>
-        * 目前仅支持开通普通空间，如需开通其他空间级别，请联系管理员
-        <a href="https://gitee.com/pcdl233" target="_blank" />
+        * 目前仅支持开通普通空间，如需开通其他空间级别，请联系
+        <a href="https://github.com/pcdl233" target="_blank"> 管理员 </a>
       </a-typography-paragraph>
-      <a-typography-paragraph v-for="spaceLevel in spaceLevelList">
+      <a-typography-paragraph v-for="spaceLevel in spaceLevelList" :key="spaceLevel">
         {{ spaceLevel.text }}: 大小 {{ spaceLevel.maxSize }}，条数 {{ spaceLevel.maxCount }}
       </a-typography-paragraph>
     </a-card>

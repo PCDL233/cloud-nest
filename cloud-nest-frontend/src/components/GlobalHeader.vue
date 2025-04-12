@@ -159,7 +159,7 @@ const doLogout = async () => {
 }
 //关于
 const doAbout = () => {
-  window.open('https://gitee.com/PCDL233', '_blank')
+  window.open('https://github.com/PCDL233', '_blank')
 }
 //国际化
 const { localeChangeFunc, localeFather } = defineProps(['localeChangeFunc', 'localeFather'])
